@@ -412,6 +412,12 @@ private fun OptionsPage(
                     viewModel.noThreeScreenshot,
                     viewModel::updateNoThreeScreenshot,
                 )
+                SettingsToggle(
+                    stringResource(R.string.double_tap_to_sleep_title),
+                    stringResource(R.string.double_tap_to_sleep_summary),
+                    viewModel.noDoubleTapToSleep,
+                    viewModel::updateNoDoubleTapToSleep,
+                )
                 if (viewModel.hasVibrator) {
                     SettingsToggle(
                         stringResource(R.string.pulse_bass_haptics_disabled_title),

@@ -27,6 +27,10 @@
     <string name="three_screenshot_disabled_summary">Temporary disable three-fingers-swipe gesture while in-game</string>
     <string name="three_screenshot_disabled_title">Disable three fingers swipe gesture</string>
 
+    <!-- Double tap to sleep -->
+    <string name="double_tap_to_sleep_title">Disable double tap to sleep</string>
+    <string name="double_tap_to_sleep_summary">Disable status bar double tap to sleep while in-game</string>
+
     <!-- Stay awake -->
     <string name="stay_awake_title">Stay awake</string>
     <string name="stay_awake_summary">Keep screen awake while in-game</string>

@@ -60,6 +60,10 @@ class AppSettings @Inject constructor(private val context: Context) {
         get() = db.getBoolean(KEY_3SCREENSHOT_DISABLE, false)
         set(it) = db.edit().putBoolean(KEY_3SCREENSHOT_DISABLE, it).apply()
 
+    var noDoubleTapToSleep
+        get() = db.getBoolean(KEY_DOUBLE_TAP_TO_SLEEP, false)
+        set(value) = db.edit().putBoolean(KEY_DOUBLE_TAP_TO_SLEEP, value).apply()
+
     var danmakuNotification
         get() = db.getBoolean(KEY_DANMAKU_NOTIFICATION_MODE, true)
         set(value) = db.edit().putBoolean(KEY_DANMAKU_NOTIFICATION_MODE, value).apply()
@@ -158,6 +162,7 @@ class AppSettings @Inject constructor(private val context: Context) {
     companion object {
         const val KEY_AUTO_BRIGHTNESS_DISABLE = "gamespace_auto_brightness_disabled"
         const val KEY_3SCREENSHOT_DISABLE = "gamespace_tfgesture_disabled"
+        const val KEY_DOUBLE_TAP_TO_SLEEP = "double_tap_sleep_gesture"
         const val KEY_STAY_AWAKE = "gamespace_stay_awake"
         const val KEY_DANMAKU_NOTIFICATION_MODE = "gamespace_danmaku_notification_mode"
         const val KEY_CALLS_MODE = "gamespace_calls_mode"

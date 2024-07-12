@@ -63,6 +63,8 @@ class GameSession @Inject constructor(
             threeScreenshot = systemSettings.threeScreenshot,
             ringerMode = audioManager.ringerModeInternal,
             pulseBassHaptics = systemSettings.pulseBassHaptics,
+            doubleTapToSleep =
+                if (appSettings.noDoubleTapToSleep) systemSettings.doubleTapToSleep else null,
         )
         if (appSettings.noAutoBrightness) {
             systemSettings.autoBrightness = false
@@ -73,6 +75,9 @@ class GameSession @Inject constructor(
         }
         if (appSettings.noThreeScreenshot) {
             systemSettings.threeScreenshot = 0
+        }
+        if (appSettings.noDoubleTapToSleep) {
+            systemSettings.doubleTapToSleep = false
         }
         if (appSettings.ringerMode != 3) {
             audioManager.ringerModeInternal = appSettings.ringerMode
@@ -97,6 +102,7 @@ class GameSession @Inject constructor(
         if (appSettings.noThreeScreenshot) {
             systemSettings.threeScreenshot = orig.threeScreenshot
         }
+        orig.doubleTapToSleep?.let { systemSettings.doubleTapToSleep = it }
         if (appSettings.ringerMode != 3) {
             audioManager.ringerModeInternal = orig.ringerMode
         }

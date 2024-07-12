@@ -33,6 +33,10 @@ class SystemSettings @Inject constructor(
 
     private val resolver = context.contentResolver
 
+    private val doubleTapToSleepDefault = context.resources.getBoolean(
+        org.lineageos.platform.internal.R.bool.config_dt2sGestureEnabledByDefault
+    ).toInt()
+
     private val wakelock = (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.FULL_WAKE_LOCK, "GameSpace")
 
@@ -111,6 +115,18 @@ class SystemSettings @Inject constructor(
             LineageSettings.System.putIntForUser(
                 resolver, LineageSettings.System.KEY_THREE_FINGERS_SWIPE_ACTION,
                 value, UserHandle.USER_CURRENT
+            )
+        }
+
+    var doubleTapToSleep
+        get() = LineageSettings.System.getIntForUser(
+            resolver, LineageSettings.System.DOUBLE_TAP_SLEEP_GESTURE,
+            doubleTapToSleepDefault, UserHandle.USER_CURRENT
+        ) == 1
+        set(value) {
+            LineageSettings.System.putIntForUser(
+                resolver, LineageSettings.System.DOUBLE_TAP_SLEEP_GESTURE,
+                value.toInt(), UserHandle.USER_CURRENT
             )
         }
 

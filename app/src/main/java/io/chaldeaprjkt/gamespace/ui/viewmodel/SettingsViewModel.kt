@@ -77,6 +77,9 @@ constructor(
     var noThreeScreenshot by mutableStateOf(appSettings.noThreeScreenshot)
         private set
 
+    var noDoubleTapToSleep by mutableStateOf(appSettings.noDoubleTapToSleep)
+        private set
+
     var stayAwake by mutableStateOf(appSettings.stayAwake)
         private set
 
@@ -190,6 +193,7 @@ constructor(
         ringerMode = appSettings.ringerMode
         noAutoBrightness = appSettings.noAutoBrightness
         noThreeScreenshot = appSettings.noThreeScreenshot
+        noDoubleTapToSleep = appSettings.noDoubleTapToSleep
         stayAwake = appSettings.stayAwake
         quickStartApps = appSettings.quickStartApps
         bypassChargeEnabled = systemSettings.bypassChargeEnabled
@@ -301,6 +305,11 @@ constructor(
     fun updateNoThreeScreenshot(disabled: Boolean) {
         noThreeScreenshot = disabled
         appSettings.noThreeScreenshot = disabled
+    }
+
+    fun updateNoDoubleTapToSleep(disabled: Boolean) {
+        noDoubleTapToSleep = disabled
+        appSettings.noDoubleTapToSleep = disabled
     }
 
     fun updateStayAwake(enabled: Boolean) {
