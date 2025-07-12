@@ -86,7 +86,7 @@ class SettingsFragment : Hilt_SettingsFragment(), Preference.OnPreferenceChangeL
             onPreferenceChangeListener = this@SettingsFragment
         }
  
-        apps = findPreference(Settings.System.GAMESPACE_GAME_LIST)
+        apps = findPreference("gamespace_game_list")
         apps?.onRegisteredAppClick {
             perAppResult.launch(Intent(context, PerAppSettingsActivity::class.java).apply {
                 putExtra(PerAppSettingsActivity.EXTRA_PACKAGE, it)
