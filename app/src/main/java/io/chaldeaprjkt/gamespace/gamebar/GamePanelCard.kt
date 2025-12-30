@@ -17,7 +17,6 @@
 package io.chaldeaprjkt.gamespace.gamebar
 
 import android.app.*
-import android.app.FreeformLauncher
 import android.content.*
 import android.content.res.Configuration
 import android.graphics.Point
@@ -1066,8 +1065,23 @@ fun QuickStartAppIcon(
     }
 }
 
+
 fun launchAppInFreeformMode(context: Context, packageName: String) {
-    FreeformLauncher.launch(packageName)
+    try {
+        val packageManager = context.packageManager
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent != null) {
+            val activityName = launchIntent.component?.className
+            val freeformIntent = Intent("com.libremobileos.freeform.START_FREEFORM")
+                .setPackage("com.libremobileos.freeform")
+                .putExtra("packageName", packageName)
+                .putExtra("activityName", activityName)
+                .putExtra("userId", android.os.Process.myUid() / 100000)
+            context.sendBroadcast(freeformIntent)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
 
 @Composable
