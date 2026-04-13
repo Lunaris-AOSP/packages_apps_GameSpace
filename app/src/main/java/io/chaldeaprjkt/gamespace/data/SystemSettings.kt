@@ -29,6 +29,11 @@ class SystemSettings @Inject constructor(
     private val gameModeUtils: GameModeUtils
 ) {
 
+    private companion object {
+        // Not exposed in all SDK stubs; the underlying settings key is stable.
+        private const val SCREEN_BRIGHTNESS_FLOAT = "screen_brightness_float"
+    }
+
     private val resolver = context.contentResolver
 
     var headsup
@@ -58,6 +63,32 @@ class SystemSettings @Inject constructor(
                 else Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                 UserHandle.USER_CURRENT
             )
+        }
+
+    var brightness
+        get() = Settings.System.getIntForUser(
+            resolver,
+            Settings.System.SCREEN_BRIGHTNESS,
+            100,
+            UserHandle.USER_CURRENT
+        )
+        set(value) {
+            val clamped = value.coerceIn(0, 255)
+            Settings.System.putIntForUser(
+                resolver,
+                Settings.System.SCREEN_BRIGHTNESS,
+                clamped,
+                UserHandle.USER_CURRENT
+            )
+            // Best-effort sync for devices preferring the float setting.
+            runCatching {
+                Settings.System.putFloatForUser(
+                    resolver,
+                    SCREEN_BRIGHTNESS_FLOAT,
+                    clamped / 255f,
+                    UserHandle.USER_CURRENT
+                )
+            }
         }
 
     var threeScreenshot

@@ -106,6 +106,8 @@
                 <include layout="@layout/tiles" />
             </HorizontalScrollView>
 
+            <include layout="@layout/brightness_bar" />
+
             <include layout="@layout/memview" />
 
         </LinearLayout>
