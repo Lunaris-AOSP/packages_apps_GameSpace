@@ -77,6 +77,12 @@
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
+            android:key="gamespace_music_player_enabled"
+            android:title="@string/music_player_enabled_title"
+            android:summary="@string/music_player_enabled_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             android:key="call_overlay_enabled"
             android:title="@string/call_overlay_enabled_title"
             android:summary="@string/call_overlay_enabled_summary"

@@ -126,6 +126,8 @@ class TileRepository @Inject constructor(
 
     val isBrightnessVisible: MutableState<Boolean> = mutableStateOf(appSettings.brightnessEnabled)
     val isFpsGraphVisible: MutableState<Boolean> = mutableStateOf(appSettings.fpsGraphEnabled)
+    val isMusicPlayerVisible: MutableState<Boolean> = mutableStateOf(appSettings.musicPlayerEnabled)
+
     fun init(platform: AxPlatformClient) {
         this.platform = platform
 
@@ -165,6 +167,11 @@ class TileRepository @Inject constructor(
     fun setFpsGraphEnabled(enabled: Boolean) {
         isFpsGraphVisible.value = enabled
         appSettings.fpsGraphEnabled = enabled
+    }
+
+    fun setMusicPlayerEnabled(enabled: Boolean) {
+        isMusicPlayerVisible.value = enabled
+        appSettings.musicPlayerEnabled = enabled
     }
 
     private fun saveTileOrder() {
