@@ -176,4 +176,22 @@
     <!-- Pulse bass haptics -->
     <string name="pulse_bass_haptics_disabled_title">Disable pulse bass haptics</string>
     <string name="pulse_bass_haptics_disabled_summary">Automatically disable pulse bass haptics if enabled</string>
- </resources>
+     <!-- Crosshair -->
+    <string name="crosshair_settings_title">Custom Crosshair</string>
+    <string name="crosshair_settings_summary">Show centered custom aiming reticle overlays on screen</string>
+    <string name="tile_crosshair">Crosshair</string>
+    <string name="crosshair_style_title">Crosshair style</string>
+    <string name="crosshair_style_entry">Style %1$d</string>
+    <string name="crosshair_color_title">Crosshair color</string>
+    <string name="crosshair_color_green">Green</string>
+    <string name="crosshair_color_red">Red</string>
+    <string name="crosshair_color_cyan">Cyan</string>
+    <string name="crosshair_color_yellow">Yellow</string>
+    <string name="crosshair_color_white">White</string>
+    <string name="crosshair_color_blue">Blue</string>
+    <string name="crosshair_size_title">Size</string>
+    <string name="crosshair_opacity_title">Opacity</string>
+    <string name="crosshair_offset_x_title">X offset</string>
+    <string name="crosshair_offset_y_title">Y offset</string>
+    <string name="crosshair_reset_position_title">Reset position</string>
+</resources>

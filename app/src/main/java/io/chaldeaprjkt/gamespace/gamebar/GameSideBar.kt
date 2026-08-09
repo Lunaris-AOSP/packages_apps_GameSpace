@@ -444,6 +444,7 @@ class GameSidebar(
                     ) {}
             ) {
                 GamePanelCard(
+                    appSettings = appSettings,
                     interactor = brightnessInteractor,
                     fpsInteractor = fpsInteractor,
                     apps = apps,

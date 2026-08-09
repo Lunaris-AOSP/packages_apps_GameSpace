@@ -56,4 +56,21 @@
         <item>@string/game_mode_performance</item>
         <item>@string/game_mode_battery</item>
     </string-array>
+    <string-array name="crosshair_color_entries" translatable="false">
+        <item>@string/crosshair_color_green</item>
+        <item>@string/crosshair_color_red</item>
+        <item>@string/crosshair_color_cyan</item>
+        <item>@string/crosshair_color_yellow</item>
+        <item>@string/crosshair_color_white</item>
+        <item>@string/crosshair_color_blue</item>
+    </string-array>
+
+    <string-array name="crosshair_color_values" translatable="false">
+        <item>-16711936</item>
+        <item>-65536</item>
+        <item>-16711681</item>
+        <item>-256</item>
+        <item>-1</item>
+        <item>-14575885</item>
+    </string-array>
 </resources>

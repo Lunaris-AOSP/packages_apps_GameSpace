@@ -127,6 +127,82 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="crosshair_settings"
+        android:title="@string/crosshair_settings_title">
+
+        <SwitchPreferenceCompat
+            android:key="gamespace_crosshair_enabled"
+            android:title="@string/crosshair_settings_title"
+            android:summary="@string/crosshair_settings_summary"
+            android:persistent="false"
+            android:defaultValue="false" />
+
+        <ListPreference
+            android:key="gamespace_crosshair_style"
+            android:title="@string/crosshair_style_title"
+            android:summary="%s"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false" />
+
+        <ListPreference
+            android:key="gamespace_crosshair_color"
+            android:title="@string/crosshair_color_title"
+            android:summary="%s"
+            android:entries="@array/crosshair_color_entries"
+            android:entryValues="@array/crosshair_color_values"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false" />
+
+        <com.crdroid.settings.preferences.CustomSeekBarPreference
+            android:key="gamespace_crosshair_size"
+            android:title="@string/crosshair_size_title"
+            android:defaultValue="36"
+            android:max="64"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false"
+            app:min="24"
+            app:units="dp" />
+
+        <com.crdroid.settings.preferences.CustomSeekBarPreference
+            android:key="gamespace_crosshair_opacity"
+            android:title="@string/crosshair_opacity_title"
+            android:defaultValue="100"
+            android:max="100"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false"
+            app:min="20"
+            app:units="%" />
+
+        <com.crdroid.settings.preferences.CustomSeekBarPreference
+            android:key="gamespace_crosshair_offset_x"
+            android:title="@string/crosshair_offset_x_title"
+            android:defaultValue="0"
+            android:max="100"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false"
+            app:min="-100"
+            app:showSign="true"
+            app:units="dp" />
+
+        <com.crdroid.settings.preferences.CustomSeekBarPreference
+            android:key="gamespace_crosshair_offset_y"
+            android:title="@string/crosshair_offset_y_title"
+            android:defaultValue="0"
+            android:max="100"
+            android:dependency="gamespace_crosshair_enabled"
+            android:persistent="false"
+            app:min="-100"
+            app:showSign="true"
+            app:units="dp" />
+
+        <Preference
+            android:key="crosshair_reset_position"
+            android:title="@string/crosshair_reset_position_title"
+            android:dependency="gamespace_crosshair_enabled" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="quick_start_apps_category">
 
         <io.chaldeaprjkt.gamespace.preferences.QuickStartAppPreference

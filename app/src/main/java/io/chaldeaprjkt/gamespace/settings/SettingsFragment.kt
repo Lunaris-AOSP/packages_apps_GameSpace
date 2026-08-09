@@ -28,10 +28,12 @@ import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.ListPreference
 
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
+import com.crdroid.settings.preferences.CustomSeekBarPreference
 
 import dagger.hilt.android.AndroidEntryPoint
 
 import io.chaldeaprjkt.gamespace.R
+import io.chaldeaprjkt.gamespace.data.AppSettings
 import io.chaldeaprjkt.gamespace.data.GameOptimizationManager
 import io.chaldeaprjkt.gamespace.preferences.AppListPreferences
 import io.chaldeaprjkt.gamespace.preferences.QuickStartAppPreference
@@ -39,6 +41,7 @@ import io.chaldeaprjkt.gamespace.preferences.QuickStartAppPreferenceDialogFragme
 import io.chaldeaprjkt.gamespace.preferences.appselector.AppSelectorActivity
 
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint(SettingsBasePreferenceFragment::class)
 class SettingsFragment : Hilt_SettingsFragment(),
@@ -49,6 +52,9 @@ class SettingsFragment : Hilt_SettingsFragment(),
 
     @Inject
     lateinit var gameOptimization: GameOptimizationManager
+
+    @Inject
+    lateinit var appSettings: AppSettings
 
     private val selectorResult =
         registerForActivityResult(
@@ -67,6 +73,70 @@ class SettingsFragment : Hilt_SettingsFragment(),
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
         updatePreferences()
+        updateCrosshairPreferences()
+    }
+
+    private fun updateCrosshairPreferences() {
+        findPreference<SwitchPreferenceCompat>(AppSettings.KEY_CROSSHAIR_ENABLED)?.apply {
+            isChecked = appSettings.crosshairEnabled
+            setOnPreferenceChangeListener { _, value ->
+                appSettings.crosshairEnabled = value as Boolean
+                true
+            }
+        }
+
+        findPreference<ListPreference>(AppSettings.KEY_CROSSHAIR_STYLE)?.apply {
+            entries = (1..8).map { getString(R.string.crosshair_style_entry, it) }.toTypedArray()
+            entryValues = (1..8).map { it.toString() }.toTypedArray()
+        }
+        bindCrosshairList(AppSettings.KEY_CROSSHAIR_STYLE, appSettings.crosshairStyle) {
+            appSettings.crosshairStyle = it
+        }
+        bindCrosshairList(AppSettings.KEY_CROSSHAIR_COLOR, appSettings.crosshairColor) {
+            appSettings.crosshairColor = it
+        }
+        bindCrosshairSlider(AppSettings.KEY_CROSSHAIR_SIZE, appSettings.crosshairSize) {
+            appSettings.crosshairSize = it
+        }
+        bindCrosshairSlider(
+            AppSettings.KEY_CROSSHAIR_OPACITY,
+            (appSettings.crosshairOpacity * 100).roundToInt()
+        ) {
+            appSettings.crosshairOpacity = it / 100f
+        }
+        bindCrosshairSlider(AppSettings.KEY_CROSSHAIR_OFFSET_X, appSettings.crosshairOffsetX) {
+            appSettings.crosshairOffsetX = it
+        }
+        bindCrosshairSlider(AppSettings.KEY_CROSSHAIR_OFFSET_Y, appSettings.crosshairOffsetY) {
+            appSettings.crosshairOffsetY = it
+        }
+        findPreference<Preference>("crosshair_reset_position")?.setOnPreferenceClickListener {
+            appSettings.crosshairOffsetX = 0
+            appSettings.crosshairOffsetY = 0
+            updateCrosshairPreferences()
+            true
+        }
+    }
+
+    // Persist through AppSettings to retain numeric types and per-game overrides.
+    private fun bindCrosshairList(key: String, currentValue: Int, update: (Int) -> Unit) {
+        findPreference<ListPreference>(key)?.apply {
+            value = currentValue.toString()
+            setOnPreferenceChangeListener { _, value ->
+                update((value as String).toInt())
+                true
+            }
+        }
+    }
+
+    private fun bindCrosshairSlider(key: String, currentValue: Int, update: (Int) -> Unit) {
+        findPreference<CustomSeekBarPreference>(key)?.apply {
+            value = currentValue
+            setOnPreferenceChangeListener { _, value ->
+                update(value as Int)
+                true
+            }
+        }
     }
 
     private fun hasVibrator(): Boolean {
@@ -123,6 +193,7 @@ class SettingsFragment : Hilt_SettingsFragment(),
     override fun onResume() {
         super.onResume()
         apps?.updateAppList()
+        updateCrosshairPreferences()
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
