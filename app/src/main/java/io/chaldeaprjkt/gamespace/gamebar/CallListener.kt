@@ -41,6 +41,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
@@ -219,6 +220,7 @@ class CallListener @Inject constructor(
         }
 
         val callerPhoto = loadContactPhoto(context, incomingNumber)
+        val callerName = lookupContactName(incomingNumber).ifBlank { incomingNumber }
 
         ringerOverlay = ComposeView(context).apply {
             repeatWhenAttached {
@@ -235,6 +237,7 @@ class CallListener @Inject constructor(
                             motionScheme = MotionScheme.expressive(),
                         ) {
                             CallOverlay(
+                                callerName = callerName,
                                 onAccept = {
                                     telecomManager.acceptRingingCall()
                                     handleOffhookState()
@@ -291,10 +294,45 @@ class CallListener @Inject constructor(
             null
         }
     }
+
+}
+
+@Composable
+fun CallerTextCard(
+    callerName: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .shadow(6.dp, CircleShape)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.9f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f), CircleShape)
+            .widthIn(max = 180.dp)
+            .padding(horizontal = 22.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = callerName,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = stringResource(R.string.incoming_call),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+        )
+    }
 }
 
 @Composable
 fun CallOverlay(
+    callerName: String,
     onAccept: () -> Unit,
     onReject: () -> Unit,
     onDismiss: () -> Unit,
@@ -382,7 +420,14 @@ fun CallOverlay(
         }
     }
 
-    Box(
+    val enterTransition = remember(alignRight) {
+        slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessLow)) { if (alignRight) it else -it } + fadeIn()
+    }
+    val exitTransition = remember(alignRight) {
+        slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessLow)) { if (alignRight) it else -it } + fadeOut()
+    }
+
+    Row(
         modifier = Modifier
             .padding(horizontal = 12.dp, vertical = 8.dp)
             .graphicsLayer(
@@ -390,14 +435,25 @@ fun CallOverlay(
                 scaleY = scale,
                 alpha = fadeAlpha
             ),
-        contentAlignment = if (alignRight) Alignment.TopEnd else Alignment.TopStart
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (alignRight) {
+            AnimatedVisibility(
+                visible = isVisible && !isDismissing,
+                enter = enterTransition,
+                exit = exitTransition
+            ) {
+                CallerTextCard(callerName = callerName)
+            }
+        }
+
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f))
                 .padding(12.dp)
                 .shadow(8.dp, CircleShape)
         ) {
@@ -488,6 +544,16 @@ fun CallOverlay(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
+            }
+        }
+
+        if (!alignRight) {
+            AnimatedVisibility(
+                visible = isVisible && !isDismissing,
+                enter = enterTransition,
+                exit = exitTransition
+            ) {
+                CallerTextCard(callerName = callerName)
             }
         }
     }
