@@ -90,6 +90,14 @@ class SessionService : Hilt_SessionService() {
                 musicController.hasActiveMedia.value = false
             }
         }
+
+        if (key != null && key.endsWith(AppSettings.KEY_FPS_GRAPH_ENABLED)) {
+            if (appSettings.fpsGraphEnabled) {
+                fpsInteractor.start()
+            } else {
+                fpsInteractor.dispose()
+            }
+        }
     }
 
     private var dndEnabledByUs = false
@@ -193,6 +201,9 @@ class SessionService : Hilt_SessionService() {
         sidebar.onGameStart(packageName)
 
         callListener.init()
+        if (appSettings.fpsGraphEnabled) {
+            fpsInteractor.start()
+        }
     }
 
     private fun stopGameSession() {
@@ -206,6 +217,7 @@ class SessionService : Hilt_SessionService() {
         sidebar.onGameLeave()
         session.unregister()
         callListener.destroy()
+        fpsInteractor.dispose()
         restoreAutoDnd()
 
         currentPackage = null

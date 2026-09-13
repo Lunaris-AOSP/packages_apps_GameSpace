@@ -275,7 +275,6 @@ class GameSidebar(
         isIdleState.value = false
 
         tileRepository.refreshPlatformStates()
-        fpsInteractor.start()
         brightnessInteractor.start()
 
         val pv = createPanelView()
@@ -289,7 +288,6 @@ class GameSidebar(
             gameBarView.visibility = View.GONE
         } catch (_: Exception) {
             brightnessInteractor.dispose()
-            fpsInteractor.dispose()
             panelShowing = false
         }
     }
@@ -303,7 +301,6 @@ class GameSidebar(
         panelShowing = false
 
         brightnessInteractor.dispose()
-        fpsInteractor.dispose()
 
         panelView?.let { pv ->
             runCatching { wm.removeViewImmediate(pv) }
@@ -327,7 +324,6 @@ class GameSidebar(
         panelDismissing.value = true
 
         brightnessInteractor.dispose()
-        fpsInteractor.dispose()
 
         panelView?.let { pv ->
             runCatching { wm.removeViewImmediate(pv) }
