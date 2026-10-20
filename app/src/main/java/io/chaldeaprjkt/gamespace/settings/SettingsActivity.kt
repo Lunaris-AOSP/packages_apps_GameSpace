@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2024-2026 Lunaris AOSP
  * Copyright (C) 2021 Chaldeaprjkt
  * Copyright (C) 2022-2026 crDroid Android Project
  * Copyright (C) 2025-2026 AxionOS
@@ -18,22 +19,29 @@
 package io.chaldeaprjkt.gamespace.settings
 
 import android.os.Bundle
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import io.chaldeaprjkt.gamespace.ui.screens.SettingsScreen
+import io.chaldeaprjkt.gamespace.ui.theme.GameSpaceTheme
+import io.chaldeaprjkt.gamespace.ui.viewmodel.SettingsViewModel
 
-@AndroidEntryPoint(CollapsingToolbarBaseActivity::class)
+@AndroidEntryPoint(ComponentActivity::class)
 class SettingsActivity : Hilt_SettingsActivity() {
+    private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(
-                    com.android.settingslib.collapsingtoolbar.R.id.content_frame,
-                    SettingsFragment()
-                )
-                .commit()
+        enableEdgeToEdge()
+        setContent {
+            GameSpaceTheme { SettingsScreen(viewModel = viewModel, onBack = { finish() }) }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
     }
 }
