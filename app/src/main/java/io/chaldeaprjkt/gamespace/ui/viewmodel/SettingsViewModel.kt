@@ -1,37 +1,62 @@
+/*
+ * Copyright (C) 2024-2026 Lunaris AOSP
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.chaldeaprjkt.gamespace.ui.viewmodel
 
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.SystemProperties
+import android.database.ContentObserver
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemProperties
+import android.os.UserHandle
+import android.os.Vibrator
+import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.chaldeaprjkt.gamespace.R
 import io.chaldeaprjkt.gamespace.data.AppSettings
+import io.chaldeaprjkt.gamespace.data.GameConfig
+import io.chaldeaprjkt.gamespace.data.GameOptimizationManager
 import io.chaldeaprjkt.gamespace.data.SystemSettings
 import io.chaldeaprjkt.gamespace.data.UserGame
 import io.chaldeaprjkt.gamespace.utils.GameModeUtils
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class RegisteredGame(
     val packageName: String,
     val label: String,
     val icon: Drawable?,
-    val mode: Int
+    val mode: Int,
 )
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class SettingsViewModel
+@Inject
+constructor(
     @ApplicationContext private val context: Context,
     private val appSettings: AppSettings,
     private val systemSettings: SystemSettings,
-    private val gameModeUtils: GameModeUtils
+    private val gameModeUtils: GameModeUtils,
+    private val gameOptimization: GameOptimizationManager,
 ) : ViewModel() {
 
     var callOverlayEnabled by mutableStateOf(appSettings.callOverlayEnabled)
@@ -52,10 +77,7 @@ class SettingsViewModel @Inject constructor(
     var noThreeScreenshot by mutableStateOf(appSettings.noThreeScreenshot)
         private set
 
-    var stayAwake by mutableStateOf(systemSettings.stayAwake)
-        private set
-
-    var menuOpacity by mutableFloatStateOf(appSettings.menuOpacity.toFloat())
+    var stayAwake by mutableStateOf(appSettings.stayAwake)
         private set
 
     var registeredGames by mutableStateOf<List<RegisteredGame>>(emptyList())
@@ -97,11 +119,126 @@ class SettingsViewModel @Inject constructor(
     var crosshairOffsetY by mutableIntStateOf(appSettings.crosshairOffsetY)
         private set
 
-    val isBypassSupported = Build.MANUFACTURER.equals("Google", ignoreCase = true) 
-            || SystemProperties.getBoolean("persist.sys.ax_chg_bypass", false)
+    val isBypassSupported =
+        Build.MANUFACTURER.equals("Google", ignoreCase = true) ||
+            SystemProperties.getBoolean("persist.sys.battery_bypass_supported", false)
+
+    val hasVibrator = context.getSystemService(Vibrator::class.java)?.hasVibrator() == true
+
+    var autoGameDetect by mutableStateOf(systemSettings.autoGameDetect)
+        private set
+
+    var lockGesture by mutableStateOf(appSettings.lockGesture)
+        private set
+
+    var noPulseBassHaptics by mutableStateOf(appSettings.noPulseBassHaptics)
+        private set
+
+    var memoryManagement by mutableStateOf(gameOptimization.isMemoryManagementEnabled)
+        private set
+
+    var cacheManagement by mutableStateOf(gameOptimization.isCacheManagementEnabled)
+        private set
+
+    var availableApps by mutableStateOf<List<AppItem>>(emptyList())
+        private set
+
+    var appsLoading by mutableStateOf(false)
+        private set
+
+    var appsLoadFailed by mutableStateOf(false)
+        private set
+
+    var gamesLoading by mutableStateOf(true)
+        private set
+
+    var message by mutableStateOf<String?>(null)
+        private set
+
+    private var gamesJob: Job? = null
+    private val preferenceListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshPreferences() }
+    private val settingsObserver =
+        object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                refresh()
+            }
+        }
 
     init {
+        appSettings.registerListener(preferenceListener)
+        listOf("gamespace_game_list", "gamespace_auto_game_detect", "bypass_charge_enabled")
+            .forEach {
+                context.contentResolver.registerContentObserver(
+                    Settings.System.getUriFor(it),
+                    false,
+                    settingsObserver,
+                    UserHandle.USER_CURRENT,
+                )
+            }
+    }
+
+    fun refresh() {
+        refreshPreferences()
         loadRegisteredGames()
+    }
+
+    private fun refreshPreferences() {
+        callOverlayEnabled = appSettings.callOverlayEnabled
+        danmakuNotification = appSettings.danmakuNotification
+        callsMode = appSettings.callsMode
+        ringerMode = appSettings.ringerMode
+        noAutoBrightness = appSettings.noAutoBrightness
+        noThreeScreenshot = appSettings.noThreeScreenshot
+        stayAwake = appSettings.stayAwake
+        quickStartApps = appSettings.quickStartApps
+        bypassChargeEnabled = systemSettings.bypassChargeEnabled
+        iconIdleAlpha = appSettings.iconIdleAlpha.toFloat()
+        autoDnd = appSettings.autoDnd
+        musicPlayerEnabled = appSettings.musicPlayerEnabled
+        crosshairEnabled = appSettings.crosshairEnabled
+        crosshairStyle = appSettings.crosshairStyle
+        crosshairSize = appSettings.crosshairSize
+        crosshairColor = appSettings.crosshairColor
+        crosshairOpacity = appSettings.crosshairOpacity
+        crosshairOffsetX = appSettings.crosshairOffsetX
+        crosshairOffsetY = appSettings.crosshairOffsetY
+        autoGameDetect = systemSettings.autoGameDetect
+        lockGesture = appSettings.lockGesture
+        noPulseBassHaptics = appSettings.noPulseBassHaptics
+        memoryManagement = gameOptimization.isMemoryManagementEnabled
+        cacheManagement = gameOptimization.isCacheManagementEnabled
+    }
+
+    fun updateAutoGameDetect(enabled: Boolean) {
+        systemSettings.autoGameDetect = enabled
+        autoGameDetect = enabled
+    }
+
+    fun updateLockGesture(enabled: Boolean) {
+        appSettings.lockGesture = enabled
+        lockGesture = enabled
+    }
+
+    fun updateNoPulseBassHaptics(disabled: Boolean) {
+        appSettings.noPulseBassHaptics = disabled
+        noPulseBassHaptics = disabled
+    }
+
+    fun updateMemoryManagement(enabled: Boolean) {
+        gameOptimization.isMemoryManagementEnabled = enabled
+        memoryManagement = enabled
+    }
+
+    fun updateCacheManagement(enabled: Boolean) {
+        gameOptimization.isCacheManagementEnabled = enabled
+        cacheManagement = enabled
+    }
+
+    override fun onCleared() {
+        appSettings.unregisterListener(preferenceListener)
+        context.contentResolver.unregisterContentObserver(settingsObserver)
+        super.onCleared()
     }
 
     fun updateCrosshairEnabled(enabled: Boolean) {
@@ -168,12 +305,7 @@ class SettingsViewModel @Inject constructor(
 
     fun updateStayAwake(enabled: Boolean) {
         stayAwake = enabled
-        systemSettings.stayAwake = enabled
-    }
-
-    fun updateMenuOpacity(opacity: Float) {
-        menuOpacity = opacity
-        appSettings.menuOpacity = opacity.toInt()
+        appSettings.stayAwake = enabled
     }
 
     fun updateQuickStartApps(apps: String) {
@@ -202,41 +334,136 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun loadRegisteredGames() {
-        val pm = context.packageManager
-        val flags = PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
-
-        registeredGames = systemSettings.userGames
-            .mapNotNull { game ->
-                try {
-                    val appInfo = pm.getApplicationInfo(game.packageName, flags)
-                    RegisteredGame(
-                        packageName = game.packageName,
-                        label = appInfo.loadLabel(pm).toString(),
-                        icon = appInfo.loadIcon(pm),
-                        mode = game.mode
-                    )
-                } catch (e: PackageManager.NameNotFoundException) {
-                    null
-                }
+        gamesJob?.cancel()
+        gamesJob =
+            viewModelScope.launch {
+                registeredGames =
+                    withContext(Dispatchers.IO) {
+                        val pm = context.packageManager
+                        systemSettings.userGames
+                            .mapNotNull { game ->
+                                try {
+                                    val info =
+                                        pm.getApplicationInfo(
+                                            game.packageName,
+                                            PackageManager.ApplicationInfoFlags.of(0),
+                                        )
+                                    RegisteredGame(
+                                        game.packageName,
+                                        info.loadLabel(pm).toString(),
+                                        info.loadIcon(pm),
+                                        game.mode,
+                                    )
+                                } catch (_: PackageManager.NameNotFoundException) {
+                                    null
+                                }
+                            }
+                            .sortedBy { it.label.lowercase() }
+                    }
+                gamesLoading = false
             }
-            .sortedBy { it.label.lowercase() }
+    }
+
+    fun loadAvailableApps() {
+        if (appsLoading) return
+        appsLoading = true
+        appsLoadFailed = false
+        viewModelScope.launch {
+            try {
+                availableApps =
+                    withContext(Dispatchers.IO) {
+                        val pm = context.packageManager
+                        val intent =
+                            Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+                        pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+                            .mapNotNull { it.activityInfo?.applicationInfo }
+                            .filter { it.packageName != context.packageName }
+                            .distinctBy { it.packageName }
+                            .map {
+                                AppItem(
+                                    it.packageName,
+                                    it.loadLabel(pm).toString(),
+                                    it.loadIcon(pm),
+                                )
+                            }
+                            .sortedBy { it.label.lowercase() }
+                    }
+            } catch (_: SecurityException) {
+                appsLoadFailed = true
+            } finally {
+                appsLoading = false
+            }
+        }
+    }
+
+    private fun updateDeniedList(packageName: String, denied: Boolean) {
+        val resolver = context.contentResolver
+        val packages =
+            Settings.System.getStringForUser(
+                    resolver,
+                    "gamespace_denied_list",
+                    UserHandle.USER_CURRENT,
+                )
+                .orEmpty()
+                .split(';')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .toMutableSet()
+        if (denied) packages.add(packageName) else packages.remove(packageName)
+        Settings.System.putStringForUser(
+            resolver,
+            "gamespace_denied_list",
+            packages.joinToString(";"),
+            UserHandle.USER_CURRENT,
+        )
     }
 
     fun registerGame(packageName: String) {
+        updateDeniedList(packageName, false)
         val games = systemSettings.userGames.toMutableList()
-        if (!games.any { it.packageName == packageName }) {
+        if (games.none { it.packageName == packageName }) {
             games.add(UserGame(packageName))
             systemSettings.userGames = games
+            gameModeUtils.setIntervention(packageName, GameConfig.ModeBuilder.build())
         }
         loadRegisteredGames()
     }
 
     fun unregisterGame(packageName: String) {
+        val info =
+            try {
+                context.packageManager.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(0),
+                )
+            } catch (_: PackageManager.NameNotFoundException) {
+                null
+            }
+        if (info?.category == ApplicationInfo.CATEGORY_GAME) updateDeniedList(packageName, true)
         gameModeUtils.setAngleDriverChoice(packageName, GameModeUtils.DRIVER_CHOICE_DEFAULT)
-        val games = systemSettings.userGames.toMutableList()
-        games.removeIf { it.packageName == packageName }
-        systemSettings.userGames = games
+        systemSettings.userGames =
+            systemSettings.userGames.filterNot { it.packageName == packageName }
+        gameModeUtils.setIntervention(packageName, null)
         loadRegisteredGames()
+    }
+
+    fun launchGame(packageName: String) {
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        if (intent == null) {
+            message = context.getString(R.string.game_launch_unavailable)
+            return
+        }
+        try {
+            context.startActivity(
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            )
+        } catch (_: android.content.ActivityNotFoundException) {
+            message = context.getString(R.string.game_launch_unavailable)
+        }
+    }
+
+    fun clearMessage() {
+        message = null
     }
 
     fun updateGameMode(packageName: String, mode: Int) {
@@ -244,20 +471,14 @@ class SettingsViewModel @Inject constructor(
         loadRegisteredGames()
     }
 
-    val gameModeOptions = listOf(1 to "Standard", 2 to "Performance", 3 to "Battery")
-
     val angleFeatureAvailable: Boolean
-        get() = gameModeUtils.findAnglePackage()?.isEnabled == true && gameModeUtils.isVulkanSupported()
+        get() =
+            gameModeUtils.findAnglePackage()?.isEnabled == true && gameModeUtils.isVulkanSupported()
 
-    fun getAngleDriverChoice(packageName: String): String = gameModeUtils.getAngleDriverChoice(packageName)
+    fun getAngleDriverChoice(packageName: String): String =
+        gameModeUtils.getAngleDriverChoice(packageName)
 
     fun updateAngleDriverChoice(packageName: String, choice: String) {
         gameModeUtils.setAngleDriverChoice(packageName, choice)
     }
-
-    val angleDriverOptions = listOf(
-        GameModeUtils.DRIVER_CHOICE_DEFAULT to "Default",
-        GameModeUtils.DRIVER_CHOICE_ANGLE to "ANGLE",
-        GameModeUtils.DRIVER_CHOICE_NATIVE to "Native"
-    )
 }

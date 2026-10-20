@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2024-2026 Lunaris AOSP
+    SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="settings_tab_games">Games</string>
+    <string name="settings_tab_settings">Settings</string>
+    <string name="settings_library_subtitle">Your library, ready to play.</string>
+    <string name="settings_options_subtitle">Make every session feel right.</string>
+    <string name="settings_crosshair_subtitle">Choose your reticle. Fine-tune your aim.</string>
+    <string name="settings_notifications">Calls &amp; notifications</string>
+    <string name="settings_display">Display &amp; gestures</string>
+    <string name="settings_sidebar">Sidebar</string>
+    <string name="library_empty_title">Make room for play</string>
+    <string name="library_empty_summary">Add a game to manage its performance and in-game controls.</string>
+    <string name="library_hero_title">Ready when you are</string>
+    <string name="library_hero_summary">Your games and their settings, all in one place.</string>
+    <string name="game_options_title">Game options</string>
+    <string name="game_remove_title">Remove game</string>
+    <string name="game_remove_message">Remove %1$s from your library?</string>
+    <string name="game_remove_action">Remove</string>
+    <string name="game_launch_unavailable">This game cannot be launched right now.</string>
+    <string name="game_driver_default">Default</string>
+    <string name="game_driver_angle" translatable="false">ANGLE</string>
+    <string name="game_driver_native">Native</string>
+    <string name="app_picker_search">Search apps</string>
+    <string name="app_picker_empty">No apps to show</string>
+    <string name="app_picker_no_results">No matching apps</string>
+    <string name="app_picker_load_error">Could not load your apps</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_back">Back</string>
+    <string name="search_clear">Clear search</string>
+    <string name="crosshair_preview">Crosshair preview</string>
+    <string name="crosshair_appearance">Appearance</string>
+    <string name="crosshair_position">Position</string>
+    <string name="settings_value_dp">%1$d dp</string>
+    <string name="settings_value_percent">%1$d%%</string>
+    <plurals name="library_game_count">
+        <item quantity="one">%d game</item>
+        <item quantity="other">%d games</item>
+    </plurals>
+    <plurals name="quick_start_app_count">
+        <item quantity="one">%d app selected</item>
+        <item quantity="other">%d apps selected</item>
+    </plurals>
+</resources>
