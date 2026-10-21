@@ -152,7 +152,7 @@ class AppSettings @Inject constructor(private val context: Context) {
         set(value) = db.edit().putInt(getPrefKey(KEY_CROSSHAIR_OFFSET_Y), value).apply()
 
     var musicPlayerEnabled: Boolean
-        get() = db.getBoolean(KEY_MUSIC_PLAYER_ENABLED, true)
+        get() = db.getBoolean(KEY_MUSIC_PLAYER_ENABLED, false)
         set(value) = db.edit().putBoolean(KEY_MUSIC_PLAYER_ENABLED, value).apply()
 
     companion object {
