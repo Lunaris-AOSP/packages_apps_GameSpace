@@ -113,7 +113,7 @@ fun SettingsToggle(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceBright,
         shape = RoundedCornerShape(4.dp),
     ) {
         Row(
@@ -149,7 +149,7 @@ fun SettingsToggle(
 fun SettingsAction(title: String, summary: String?, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceBright,
         shape = RoundedCornerShape(4.dp),
     ) {
         Row(
@@ -189,7 +189,7 @@ fun SettingsSlider(
 ) {
     Surface(
         modifier,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceBright,
         shape = RoundedCornerShape(4.dp),
     ) {
         Column(
@@ -289,7 +289,7 @@ fun ExpressiveActionCard(
                 scaleY = scale
             },
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceBright,
         interactionSource = interaction,
         content = content,
     )

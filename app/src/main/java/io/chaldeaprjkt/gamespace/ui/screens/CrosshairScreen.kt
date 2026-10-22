@@ -106,7 +106,7 @@ fun CrosshairScreen(viewModel: SettingsViewModel, listState: LazyListState, bott
                         Icons.Rounded.Palette,
                     ) {
                         Surface(
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            color = MaterialTheme.colorScheme.surfaceBright,
                             shape = RoundedCornerShape(4.dp),
                         ) {
                             Column(

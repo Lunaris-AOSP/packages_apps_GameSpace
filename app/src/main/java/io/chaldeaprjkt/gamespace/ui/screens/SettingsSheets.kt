@@ -138,7 +138,7 @@ fun AppPickerSheet(viewModel: SettingsViewModel, quickStart: Boolean, onDismiss:
                                     color =
                                         if (quickStart && checked)
                                             MaterialTheme.colorScheme.secondaryContainer
-                                        else MaterialTheme.colorScheme.surfaceContainerLow,
+                                        else MaterialTheme.colorScheme.surfaceBright,
                                 ) {
                                     Row(
                                         Modifier.fillMaxWidth().then(action).padding(16.dp),
