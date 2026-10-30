@@ -48,7 +48,7 @@ fun AppPickerSheet(viewModel: SettingsViewModel, quickStart: Boolean, onDismiss:
                     it.packageName.contains(query.trim(), ignoreCase = true))
         }
     LaunchedEffect(Unit) { viewModel.loadAvailableApps() }
-    ModalBottomSheet(
+    SettingsModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
@@ -208,7 +208,7 @@ fun GameOptionsSheet(game: RegisteredGame, viewModel: SettingsViewModel, onDismi
             GameModeUtils.DRIVER_CHOICE_ANGLE to stringResource(R.string.game_driver_angle),
             GameModeUtils.DRIVER_CHOICE_NATIVE to stringResource(R.string.game_driver_native),
         )
-    ModalBottomSheet(
+    SettingsModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
